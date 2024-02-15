@@ -1,0 +1,21 @@
+/* styles.css */
+
+.list-cell {
+    -fx-text-fill: black; /* Set your desired text color */
+    -fx-background-color:  #FFF8EA; /* Set your desired background color */
+    -fx-background-radius: 5; /* Set your desired background radius */
+    -fx-border-radius: 5; /* Set your desired border radius */
+}
+
+.list-cell:selected {
+    -fx-background-color: #CEDBEB; /* Set your desired background color for selected item */
+    -fx-background-radius: 5; /* Set your desired radius for the background */
+    -fx-border-radius: 5; /* Set your desired radius for the border */
+}
+.root {
+    -fx-background-color: black;
+}
+
+.button:disabled {
+    -fx-opacity: 1.0;
+}

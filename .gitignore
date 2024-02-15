@@ -1,0 +1,7 @@
+/target/
+.idea
+.mvn
+bin/
+dependency-reduced-pom.xml
+ffmpeg.exe
+temp.txt
