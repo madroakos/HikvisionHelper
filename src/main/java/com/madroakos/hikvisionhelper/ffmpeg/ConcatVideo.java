@@ -15,27 +15,51 @@ public class ConcatVideo extends Thread {
 
     public void run() {
         String fileName = "temp.txt";
+        boolean hasAudio = false;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             for (String s : filePath) {
                 writer.write("file '" + s + "'");
                 writer.newLine();
+
+                if (!hasAudio) {
+                    CheckVideo checkVideo = new CheckVideo(s);
+                    if (checkVideo.hasAudio()) {
+                        hasAudio = true;
+                    }
+                }
             }
         } catch (IOException e) {
             System.err.println("Error occurred while creating the file: " + e.getMessage());
         }
 
-        String command = String.format("\"ffmpeg.exe\" -y -f concat -safe 0 -i \"%s\" -c copy \"%s\"", fileName, outputPath);
-        System.out.println(command);
+
+        ProcessBuilder processBuilder = getCommand(fileName, hasAudio);
+
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.inheritIO().start();
+            Process process = processBuilder.inheritIO().start();
+            process.waitFor();
         } catch (IOException e) {
             System.out.println("""
                     Nem találja a program az "ffmpeg.exe" fájlt.
                     Kérlek helyezd el ide: /HikvisionHelper/bin/
                     ffmpeg: https://ffmpeg.org/download.html
                     """);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    private ProcessBuilder getCommand(String fileName, boolean hasAudio) {
+        String commandForNoAudio = String.format("\"ffmpeg.exe\" -y -f concat -safe 0 -i \"%s\" -c copy \"%s\"", fileName, outputPath);
+        String commandForAudio = String.format("\"ffmpeg.exe\" -y -f concat -safe 0 -i \"%s\" -c:v copy -c:a aac \"%s\"", fileName, outputPath);
+        ProcessBuilder processBuilder;
+
+        if (hasAudio) {
+            processBuilder = new ProcessBuilder(commandForAudio);
+        } else {
+            processBuilder = new ProcessBuilder(commandForNoAudio);
+        }
+        return processBuilder;
     }
 }

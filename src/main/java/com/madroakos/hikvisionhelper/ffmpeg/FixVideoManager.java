@@ -1,6 +1,7 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
 
+import javax.swing.*;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +27,7 @@ public class FixVideoManager {
             throw new RuntimeException(e);
         } finally {
             executor.shutdown();
+            JOptionPane.showMessageDialog(null, "Done!", "Information", JOptionPane.INFORMATION_MESSAGE);
         }
 
 

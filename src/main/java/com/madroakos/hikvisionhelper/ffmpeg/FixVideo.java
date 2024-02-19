@@ -1,6 +1,9 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
@@ -17,15 +20,20 @@ public class FixVideo extends Thread {
 
 
     public void run() {
-        String command = String.format("\"ffmpeg.exe\" -y -err_detect ignore_err -i \"%s\" -c copy \"%s\"", filePath, outputPath);
-        System.out.println(command);
+        CheckVideo checkVideo = new CheckVideo(filePath);
+        String commandForNoAudio = String.format("\"ffmpeg.exe\" -y -err_detect ignore_err -i \"%s\" -c copy \"%s\"", filePath, outputPath);
+        String commandForAudio = String.format("\"ffmpeg.exe\" -y -err_detect ignore_err -i \"%s\" -c:v copy -c:a aac \"%s\"", filePath, outputPath);
+        ProcessBuilder processBuilder;
 
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            Process process = processBuilder.inheritIO().start();
-            int exitCode = process.waitFor();
-            System.out.println("Process exited with code: " + exitCode);
-
+            if (checkVideo.hasAudio()) {
+                processBuilder = new ProcessBuilder(commandForAudio);
+            } else {
+                processBuilder = new ProcessBuilder(commandForNoAudio);
+            }
+                Process process = processBuilder.inheritIO().start();
+                int exitCode = process.waitFor();
+                System.out.println("Process exited with code: " + exitCode);
         } catch (IOException e) {
             System.out.println("""
                     "ffmpeg.exe" is not found!
@@ -33,8 +41,7 @@ public class FixVideo extends Thread {
                     ffmpeg: https://ffmpeg.org/download.html
                     """);
         } catch (InterruptedException e) {
-            System.out.println("Process interrupted!");
-            System.out.println(Arrays.toString(e.getStackTrace()));
+            throw new RuntimeException(e);
         } finally {
             countDownLatch.countDown();
         }
