@@ -1,10 +1,6 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 public class FixVideo extends Thread {
