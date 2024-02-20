@@ -20,7 +20,7 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>
         <ImageView fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
-            <Image url="@../../../logo.png" />
+            <Image url="@../../../icons/logo.png" />
         </ImageView>
         <GridPane alignment="BOTTOM_CENTER" maxHeight="400.0" maxWidth="800.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="400.0">
             <columnConstraints>
