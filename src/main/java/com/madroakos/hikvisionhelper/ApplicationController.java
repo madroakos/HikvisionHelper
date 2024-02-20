@@ -2,10 +2,12 @@ package com.madroakos.hikvisionhelper;
 
 import com.madroakos.hikvisionhelper.ffmpeg.FixVideoManager;
 import com.madroakos.hikvisionhelper.ffmpeg.ConcatVideo;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -19,15 +21,22 @@ import javafx.stage.Stage;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.net.URL;
+import java.util.*;
 import java.util.List;
-import java.util.Queue;
 
-public class ApplicationController {
+public class ApplicationController implements Initializable {
 
     @FXML
-    private ListView<String> myList;
+    private TableView<CurrentFiles> myList;
+    @FXML
+    private TableColumn<CurrentFiles, String> nameColumn;
+    @FXML
+    private TableColumn<CurrentFiles, String> startTime;
+    @FXML
+    private TableColumn<CurrentFiles, String> endTime;
+
+
 
     @FXML
     private Button addButton;
@@ -38,8 +47,13 @@ public class ApplicationController {
 
     private FixVideoManager manager;
     private final Queue<Long> mouseClickTimes = new LinkedList<>();
+    private final ArrayList<CurrentFiles> currentFiles = new ArrayList<>();
 
-    public ApplicationController() {
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFileName()));
+        startTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDate()));
+        endTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDate()));
     }
 
     @FXML
@@ -47,29 +61,33 @@ public class ApplicationController {
         Stage stage = (Stage) addButton.getScene().getWindow();
         List<String> listOfFiles = showFileChooserDialog(stage);
 
+
         if (listOfFiles != null) {
-            for (int i = 0; i < listOfFiles.size(); i++) {
-                if (myList.getItems().contains(listOfFiles.get(i))) {
-                    listOfFiles.remove(i);
-                }
+            listOfFiles.removeIf(s -> myList.getItems().contains(s));
+
+            for (String s : listOfFiles) {
+                currentFiles.add(new CurrentFiles(new File(s)));
             }
 
-            ObservableList<String> fileNames = FXCollections.observableArrayList();
-            fileNames.addAll(listOfFiles);
-            myList.getItems().addAll(fileNames);
+            ObservableList<CurrentFiles> observableList = FXCollections.observableArrayList(currentFiles);
+            myList.setItems(observableList);
+
             itemLabel.setText(myList.getItems().size() + " items");
-
-
         }
     }
 
     @FXML
     protected void onDeleteKeyPressed(KeyEvent event) {
         if (event.getCode() == KeyCode.DELETE) {
-            if (myList.getSelectionModel().getSelectedIndex() > -1) {
-                myList.getItems().remove(myList.getSelectionModel().getSelectedIndex());
-                itemLabel.setText(myList.getItems().size() + " items");
-            }
+            deleteSelectedItem();
+        }
+    }
+
+    private void deleteSelectedItem() {
+        if (myList.getSelectionModel().getSelectedIndex() > -1) {
+            currentFiles.remove(myList.getSelectionModel().getSelectedIndex());
+            myList.getItems().remove(myList.getSelectionModel().getSelectedIndex());
+            itemLabel.setText(myList.getItems().size() + " items");
         }
     }
 
@@ -78,13 +96,21 @@ public class ApplicationController {
         if (!myList.getItems().isEmpty()) {
             manager = new FixVideoManager();
             String outputPath = showFolderChooserDialog((Stage)addButton.getScene().getWindow());
-            File[] files = myList.getItems().stream().map(File::new).toArray(File[]::new);
-            manager.fixVideo(files, outputPath);
+            manager.fixVideo(getFilePaths() ,outputPath);
         }
+    }
+
+    private File[] getFilePaths() {
+        File[] file = new File[currentFiles.size()];
+        for (int i = 0; i < currentFiles.size(); i++) {
+            file[i] = currentFiles.get(i).getFile();
+        }
+        return file;
     }
 
     @FXML
     protected void onClearButtonClicked() {
+        currentFiles.clear();
         myList.getItems().clear();
         itemLabel.setText("0 items");
     }
@@ -95,12 +121,8 @@ public class ApplicationController {
             manager = new FixVideoManager();
             Stage stage = (Stage)mergeButton.getScene().getWindow();
             String outputPath = showSingleFileChooserDialog(stage);
-            String[] filePath = new String[myList.getItems().size()];
-            for (int i = 0; i < myList.getItems().size(); i++) {
-                filePath[i] = myList.getItems().get(i);
-            }
 
-            ConcatVideo concatVideo = new ConcatVideo(filePath, outputPath);
+            ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
             concatVideo.start();
 
             File[] file = new File[1];
@@ -116,12 +138,8 @@ public class ApplicationController {
             manager = new FixVideoManager();
             Stage stage = (Stage)mergeButton.getScene().getWindow();
             String outputPath = showSingleFileChooserDialog(stage);
-            String[] filePath = new String[myList.getItems().size()];
-            for (int i = 0; i < myList.getItems().size(); i++) {
-                filePath[i] = myList.getItems().get(i);
-            }
 
-            ConcatVideo concatVideo = new ConcatVideo(filePath, outputPath);
+            ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
             concatVideo.start();
         }
     }
@@ -204,10 +222,10 @@ public class ApplicationController {
                     mouseClickTimes.add(currentTime);
                 } else {
                     if (currentTime - mouseClickTimes.remove() < 500) {
-                        File currentFile = new File(myList.getSelectionModel().getSelectedItem());
-                        if (currentFile.isFile() && currentFile.canRead()) {
+                        File choosenFile = new File(String.valueOf(myList.getSelectionModel().getSelectedItem()));
+                        if (choosenFile.isFile() && choosenFile.canRead()) {
                             try {
-                                Desktop.getDesktop().open(currentFile);
+                                Desktop.getDesktop().open(choosenFile);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }

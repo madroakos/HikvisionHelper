@@ -1,14 +1,15 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class ConcatVideo extends Thread {
-    private final String[] filePath;
+    private final File[] filePath;
     private final String outputPath;
 
-    public ConcatVideo(String[] filePath, String outputPath) {
+    public ConcatVideo(File[] filePath, String outputPath) {
         this.filePath = filePath;
         this.outputPath = outputPath;
     }
@@ -18,12 +19,12 @@ public class ConcatVideo extends Thread {
         boolean hasAudio = false;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            for (String s : filePath) {
-                writer.write("file '" + s + "'");
+            for (File s : filePath) {
+                writer.write("file '" + s.getAbsolutePath() + "'");
                 writer.newLine();
 
                 if (!hasAudio) {
-                    CheckVideo checkVideo = new CheckVideo(s);
+                    CheckVideo checkVideo = new CheckVideo(s.getAbsolutePath());
                     if (checkVideo.hasAudio()) {
                         hasAudio = true;
                     }
