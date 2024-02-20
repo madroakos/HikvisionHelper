@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class CurrentFiles {
-    private File fileName;
+    private final File fileName;
     private String startDate;
     private String endDate;
     private final String FILENAME_PATTERN = "\\d{14}";
