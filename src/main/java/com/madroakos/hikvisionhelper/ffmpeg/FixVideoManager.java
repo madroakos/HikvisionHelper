@@ -29,8 +29,6 @@ public class FixVideoManager {
             executor.shutdown();
             JOptionPane.showMessageDialog(null, "Done!", "Information", JOptionPane.INFORMATION_MESSAGE);
         }
-
-
     }
 
     public void stopAllThreads() {

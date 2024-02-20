@@ -1,5 +1,7 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
+import com.madroakos.hikvisionhelper.ApplicationController;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -15,10 +17,9 @@ public class ConcatVideo extends Thread {
     }
 
     public void run() {
-        String fileName = "temp.txt";
         boolean hasAudio = false;
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        File tempFile = new File("temp.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
             for (File s : filePath) {
                 writer.write("file '" + s.getAbsolutePath() + "'");
                 writer.newLine();
@@ -34,26 +35,21 @@ public class ConcatVideo extends Thread {
             System.err.println("Error occurred while creating the file: " + e.getMessage());
         }
 
-
-        ProcessBuilder processBuilder = getCommand(fileName, hasAudio);
+        ProcessBuilder processBuilder = getCommand(tempFile.getAbsolutePath(), hasAudio);
 
         try {
             Process process = processBuilder.inheritIO().start();
             process.waitFor();
-        } catch (IOException e) {
-            System.out.println("""
-                    Nem találja a program az "ffmpeg.exe" fájlt.
-                    Kérlek helyezd el ide: /HikvisionHelper/bin/
-                    ffmpeg: https://ffmpeg.org/download.html
-                    """);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            tempFile.deleteOnExit();
         }
     }
 
     private ProcessBuilder getCommand(String fileName, boolean hasAudio) {
-        String commandForNoAudio = String.format("\"ffmpeg.exe\" -y -f concat -safe 0 -i \"%s\" -c copy \"%s\"", fileName, outputPath);
-        String commandForAudio = String.format("\"ffmpeg.exe\" -y -f concat -safe 0 -i \"%s\" -c:v copy -c:a aac \"%s\"", fileName, outputPath);
+        String commandForNoAudio = String.format("\"%s\" -y -f concat -safe 0 -i \"%s\" -c copy \"%s\"", ApplicationController.ffmpegFilePath, fileName, outputPath);
+        String commandForAudio = String.format("\"%s\" -y -f concat -safe 0 -i \"%s\" -c:v copy -c:a aac \"%s\"", ApplicationController.ffmpegFilePath, fileName, outputPath);
         ProcessBuilder processBuilder;
 
         if (hasAudio) {

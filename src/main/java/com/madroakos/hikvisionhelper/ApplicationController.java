@@ -2,6 +2,7 @@ package com.madroakos.hikvisionhelper;
 
 import com.madroakos.hikvisionhelper.ffmpeg.FixVideoManager;
 import com.madroakos.hikvisionhelper.ffmpeg.ConcatVideo;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,7 +18,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -48,12 +49,16 @@ public class ApplicationController implements Initializable {
     private FixVideoManager manager;
     private final Queue<Long> mouseClickTimes = new LinkedList<>();
     private final ArrayList<CurrentFiles> currentFiles = new ArrayList<>();
+    public static String ffmpegFilePath = "ffmpeg";
+    public static String ffprobeFilePath = "ffprobe";
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFileName()));
         startTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDate()));
         endTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDate()));
+
+        checkPreRequisites();
     }
 
     @FXML
@@ -222,7 +227,7 @@ public class ApplicationController implements Initializable {
                     mouseClickTimes.add(currentTime);
                 } else {
                     if (currentTime - mouseClickTimes.remove() < 500) {
-                        File choosenFile = new File(String.valueOf(myList.getSelectionModel().getSelectedItem()));
+                        File choosenFile = new File(String.valueOf(myList.getSelectionModel().getSelectedItem().getFileName()));
                         if (choosenFile.isFile() && choosenFile.canRead()) {
                             try {
                                 Desktop.getDesktop().open(choosenFile);
@@ -236,5 +241,43 @@ public class ApplicationController implements Initializable {
                 }
             }
         }
+    }
+
+    private static void checkPreRequisites() {
+        if (!isFfmpegExecutableInPath()) {
+            JOptionPane.showMessageDialog(null, "Okay!", "Please locate ffmpeg and ffprobe", JOptionPane.INFORMATION_MESSAGE);
+            if (((ffmpegFilePath = showSingleFileChooserDialog("ffmpeg")).isEmpty()) ||
+                    ((ffprobeFilePath = showSingleFileChooserDialog("ffprobe")).isEmpty())) {
+                Platform.exit();
+            }
+        }
+    }
+
+    private static String showSingleFileChooserDialog(String fileToBeFound) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle(String.format("Please locate %s", fileToBeFound));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileToBeFound, fileToBeFound + ".exe"));
+
+        File selectedFile = fileChooser.showOpenDialog(new Stage());
+
+        if (selectedFile != null) {
+            return selectedFile.getAbsolutePath();
+        } else {
+            Platform.exit();
+            return "";
+        }
+    }
+
+    private static boolean isFfmpegExecutableInPath() {
+        String pathEnv = System.getenv("PATH");
+        String[] pathDirs = pathEnv.split(File.pathSeparator);
+
+        for (String pathDir : pathDirs) {
+            File executableFile = new File(pathDir,"ffmpeg.exe");
+            if (executableFile.exists() && executableFile.isFile()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
