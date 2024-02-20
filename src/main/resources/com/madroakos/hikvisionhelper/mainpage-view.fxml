@@ -39,7 +39,7 @@
                 <RowConstraints maxHeight="100.0" minHeight="40.0" prefHeight="100.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
             </rowConstraints>
-         <TableView fx:id="myList" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowSpan="8">
+         <TableView fx:id="myList" onMouseClicked="#onMyListMouseClicked" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowSpan="8">
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
