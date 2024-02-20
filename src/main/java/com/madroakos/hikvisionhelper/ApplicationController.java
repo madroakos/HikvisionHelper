@@ -23,6 +23,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
@@ -51,6 +53,7 @@ public class ApplicationController implements Initializable {
     private final ArrayList<CurrentFiles> currentFiles = new ArrayList<>();
     public static String ffmpegFilePath = "ffmpeg";
     public static String ffprobeFilePath = "ffprobe";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -125,7 +128,7 @@ public class ApplicationController implements Initializable {
         if(myList.getItems().size() > 1) {
             manager = new FixVideoManager();
             Stage stage = (Stage)mergeButton.getScene().getWindow();
-            String outputPath = showSingleFileChooserDialog(stage);
+            String outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
 
             ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
             concatVideo.start();
@@ -142,11 +145,43 @@ public class ApplicationController implements Initializable {
         if(myList.getItems().size() > 1) {
             manager = new FixVideoManager();
             Stage stage = (Stage)mergeButton.getScene().getWindow();
-            String outputPath = showSingleFileChooserDialog(stage);
+            String outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
 
             ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
             concatVideo.start();
         }
+    }
+
+    private String getFileNameWithoutTimestamp(String filename) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : filename.split("_")) {
+            if (!s.matches("\\d{14}")) {
+                stringBuilder.append(s);
+            } else {
+                return stringBuilder.toString();
+            }
+        }
+        return null;
+    }
+
+    private String getFilesMinDate() {
+        LocalDateTime min = currentFiles.getFirst().getStartDateInDate();
+        for (int i = 1; i < currentFiles.size(); i++) {
+            if (currentFiles.get(i).getStartDateInDate().isBefore(min)) {
+                min = currentFiles.get(i).getStartDateInDate();
+            }
+        }
+        return min.format(formatter);
+    }
+
+    private String getFilesMaxDate() {
+        LocalDateTime max = currentFiles.getFirst().getEndDateInDate();
+        for (int i = 1; i < currentFiles.size(); i++) {
+            if (currentFiles.get(i).getEndDateInDate().isAfter(max)) {
+                max = currentFiles.get(i).getEndDateInDate();
+            }
+        }
+        return max.format(formatter);
     }
 
     @FXML
@@ -181,9 +216,10 @@ public class ApplicationController implements Initializable {
         }
     }
 
-    private String showSingleFileChooserDialog(Stage stage) {
+    private String showSingleFileChooserDialog(Stage stage, String filename, String startDate, String endDate) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Enter name of file to save to...");
+        fileChooser.setInitialFileName(String.format("%s_%s_%s", filename, startDate, endDate));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Video Files", "*.mp4"),
                 new FileChooser.ExtensionFilter("All Files", "*.*")

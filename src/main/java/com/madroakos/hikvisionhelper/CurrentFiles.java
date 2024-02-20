@@ -10,6 +10,7 @@ public class CurrentFiles {
     private String endDate;
     private final String FILENAME_PATTERN = "\\d{14}";
     private final String FILENAME_PATTERN_WITH_EXTENSION = "\\d{14}\\.mp4";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CurrentFiles (File filename) {
         this.fileName = filename;
@@ -56,7 +57,7 @@ public class CurrentFiles {
     private void setTimesWithoutEndTime() {
         String timeStamp = fileName.getName().split("_")[1];
         startDate = String.format("%s-%s-%s %s:%s:%s", timeStamp.substring(0,4), timeStamp.substring(4,6), timeStamp.substring(6,8), timeStamp.substring(8,10), timeStamp.substring(10,12), timeStamp.substring(12,14));
-        String commandForNoEndDate = String.format("\"ffprobe.exe\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"%s\"", fileName.getAbsolutePath());
+        String commandForNoEndDate = String.format("\"%s\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"%s\"", ApplicationController.ffprobeFilePath, fileName.getAbsolutePath());
         System.out.println(commandForNoEndDate);
         ProcessBuilder processBuilder = new ProcessBuilder(commandForNoEndDate);
         try {
@@ -80,12 +81,10 @@ public class CurrentFiles {
     }
 
     private void calculateEndTime (String startDate, double lengthInSeconds) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime startDateTemp = LocalDateTime.parse(startDate, formatter);
         startDateTemp = startDateTemp.plusSeconds((long) lengthInSeconds);
-        endDate = String.format("%s-%s-%s %s:%s:%s",
-                startDateTemp.getYear(), startDateTemp.getMonthValue(), startDateTemp.getDayOfMonth(),
-                startDateTemp.getHour(), startDateTemp.getMinute(), startDateTemp.getSecond());
+        endDate = startDateTemp.format(formatter);
     }
 
     public String getFileName() {
@@ -102,5 +101,11 @@ public class CurrentFiles {
 
     public File getFile() {
         return fileName;
+    }
+    public LocalDateTime getStartDateInDate() {
+        return LocalDateTime.parse(startDate, formatter);
+    }
+    public LocalDateTime getEndDateInDate() {
+        return LocalDateTime.parse(endDate, formatter);
     }
 }
