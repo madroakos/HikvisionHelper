@@ -4,4 +4,7 @@
 bin/
 dependency-reduced-pom.xml
 ffmpeg.exe
+ffprobe.exe
+*.fxml
 temp.txt
+/out/
