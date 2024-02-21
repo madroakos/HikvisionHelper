@@ -29,6 +29,7 @@ public class FixVideo extends Thread {
             } else {
                 processBuilder = new ProcessBuilder(commandForNoAudio);
             }
+                System.out.println(processBuilder.command());
                 Process process = processBuilder.inheritIO().start();
                 int exitCode = process.waitFor();
                 System.out.println("Process exited with code: " + exitCode);

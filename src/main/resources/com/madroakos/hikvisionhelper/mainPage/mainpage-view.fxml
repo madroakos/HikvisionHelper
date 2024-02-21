@@ -82,11 +82,6 @@
                     <Font name="System Bold" size="12.0" />
                 </font>
             </Button>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#onFixAndMergeButtonClicked" prefWidth="90.0" style="-fx-background-color: #FFF8EA; -fx-background-radius: 100px; -fx-border-radius: 100px; -fx-border-width: 2;" text="Fix &amp; Merge" GridPane.columnIndex="2" GridPane.rowIndex="5">
-                <font>
-                    <Font name="System Bold" size="12.0" />
-                </font>
-            </Button>
         </GridPane>
     </VBox>
 </AnchorPane>

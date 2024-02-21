@@ -136,27 +136,10 @@ public class ApplicationController implements Initializable {
     }
 
     @FXML
-    protected void onFixAndMergeButtonClicked() {
-        if(myList.getItems().size() > 1) {
-            manager = new FixVideoManager();
-            Stage stage = (Stage)mergeButton.getScene().getWindow();
-            String outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
-
-            ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
-            concatVideo.start();
-
-            File[] file = new File[1];
-            file[0] = new File(outputPath);
-
-            manager.fixVideo(file, outputPath);
-        }
-    }
-
-    @FXML
     protected void onMergeButtonClicked() {
         if(myList.getItems().size() > 1) {
             manager = new FixVideoManager();
-            Stage stage = (Stage)mergeButton.getScene().getWindow();
+            Stage stage = (Stage)myList.getScene().getWindow();
             String outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
 
             ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);

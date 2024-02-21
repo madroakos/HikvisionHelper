@@ -37,7 +37,7 @@ public class ConcatVideo extends Thread {
         }
 
         ProcessBuilder processBuilder = getCommand(tempFile.getAbsolutePath(), hasAudio);
-
+        System.out.println(processBuilder.command());
         try {
             Process process = processBuilder.inheritIO().start();
             process.waitFor();
