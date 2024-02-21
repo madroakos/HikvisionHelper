@@ -5,24 +5,25 @@ import com.madroakos.hikvisionhelper.mainPage.ApplicationController;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class CurrentFiles {
-    private final File fileName;
+    private final File file;
     private String startDate;
     private String endDate;
-    private final String FILENAME_PATTERN = "\\d{14}";
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final String FILENAME_PATTERN = "\\d{14}";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public CurrentFiles (File filename) {
-        this.fileName = filename;
+    public CurrentFiles(File file) {
+        this.file = file;
         initialize();
     }
 
     private void initialize() {
-        int countedTimes = checkFileName(fileName.getName());
-        if (countedTimes == 1) {
+        int count = checkFileName(file.getName());
+        if (count == 1) {
             setTimesWithoutEndTime();
-        } else if (countedTimes == 2) {
+        } else if (count == 2) {
             setTimes();
         }
     }
@@ -30,66 +31,80 @@ public class CurrentFiles {
     private void setTimes() {
         String timeStamp;
         int counter = 1;
-        for (String s : fileName.getName().split("_")) {
-            if (s.matches(FILENAME_PATTERN)) {
+        for (String part : file.getName().split("_")) {
+            if (part.matches(FILENAME_PATTERN)) {
+                timeStamp = part;
                 if (counter == 1) {
-                    timeStamp = s;
-                    startDate = String.format("%s-%s-%s %s:%s:%s", timeStamp.substring(0,4), timeStamp.substring(4,6), timeStamp.substring(6,8), timeStamp.substring(8,10), timeStamp.substring(10,12), timeStamp.substring(12,14));
-                    counter++;
+                    startDate = formatTimestamp(timeStamp);
                 } else if (counter == 2) {
-                    timeStamp = s;
-                    endDate = String.format("%s-%s-%s %s:%s:%s", timeStamp.substring(0,4), timeStamp.substring(4,6), timeStamp.substring(6,8), timeStamp.substring(8,10), timeStamp.substring(10,12), timeStamp.substring(12,14));
+                    endDate = formatTimestamp(timeStamp);
                     break;
                 }
+                counter++;
             }
         }
     }
 
     public int checkFileName(String fileName) {
         int counter = 0;
-        for (String s : fileName.split("_")) {
-            if (s.matches(FILENAME_PATTERN) || s.matches(FILENAME_PATTERN + ".mp4")) {
+        for (String part : fileName.split("_")) {
+            if (part.matches(FILENAME_PATTERN) || part.matches(FILENAME_PATTERN + ".mp4")) {
                 counter++;
             }
         }
         return counter;
     }
 
-    private void setTimesWithoutEndTime() {
-        String timeStamp = fileName.getName().split("_")[1];
-        startDate = String.format("%s-%s-%s %s:%s:%s", timeStamp.substring(0,4), timeStamp.substring(4,6), timeStamp.substring(6,8), timeStamp.substring(8,10), timeStamp.substring(10,12), timeStamp.substring(12,14));
-        String commandForNoEndDate = String.format("\"%s\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"%s\"", ApplicationController.ffprobeFilePath, fileName.getAbsolutePath());
-        System.out.println(commandForNoEndDate);
-        ProcessBuilder processBuilder = new ProcessBuilder(commandForNoEndDate);
+    private String calculateEndTime(String startDate, double lengthInSeconds) {
         try {
-            Process process = processBuilder.start();
-
-            InputStream inputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                try {
-                    double lengthInSeconds = Double.parseDouble(line);
-                    calculateEndTime(startDate, lengthInSeconds);
-                } catch (NumberFormatException e) {
-                    throw new RuntimeException("Error parsing duration: " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            LocalDateTime startDateTime = LocalDateTime.parse(startDate, FORMATTER);
+            LocalDateTime endDateTime = startDateTime.plusSeconds((long) lengthInSeconds);
+            return endDateTime.format(FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Error parsing start date: " + e.getMessage(), e);
         }
     }
 
-    private void calculateEndTime (String startDate, double lengthInSeconds) {
-        formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime startDateTemp = LocalDateTime.parse(startDate, formatter);
-        startDateTemp = startDateTemp.plusSeconds((long) lengthInSeconds);
-        endDate = startDateTemp.format(formatter);
+    private void setTimesWithoutEndTime() {
+        String timeStamp = getTimestampFromFileName();
+        startDate = formatTimestamp(timeStamp);
+        String commandForNoEndDate = String.format("\"%s\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"%s\"", ApplicationController.ffprobeFilePath, file.getAbsolutePath());
+        System.out.println(commandForNoEndDate);
+        try {
+            double lengthInSeconds = getVideoLength(commandForNoEndDate);
+            endDate = calculateEndTime(startDate, lengthInSeconds);
+        } catch (IOException | NumberFormatException e) {
+            throw new RuntimeException("Error setting times without end time: " + e.getMessage(), e);
+        }
+    }
+
+    private String getTimestampFromFileName() {
+        String[] parts = file.getName().split("_");
+        if (parts.length < 2) {
+            throw new IllegalArgumentException("Invalid file name format: " + file.getName());
+        }
+        return parts[1];
+    }
+
+    private String formatTimestamp(String timeStamp) {
+        return String.format("%s-%s-%s %s:%s:%s", timeStamp.substring(0, 4), timeStamp.substring(4, 6), timeStamp.substring(6, 8), timeStamp.substring(8, 10), timeStamp.substring(10, 12), timeStamp.substring(12, 14));
+    }
+
+    private double getVideoLength(String command) throws IOException {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        Process process = processBuilder.start();
+        try (InputStream inputStream = process.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            if ((line = reader.readLine()) != null) {
+                return Double.parseDouble(line);
+            }
+        }
+        throw new IOException("No duration information found.");
     }
 
     public String getFileName() {
-        return fileName.getAbsolutePath();
+        return file.getAbsolutePath();
     }
 
     public String getStartDate() {
@@ -101,12 +116,14 @@ public class CurrentFiles {
     }
 
     public File getFile() {
-        return fileName;
+        return file;
     }
+
     public LocalDateTime getStartDateInDate() {
-        return LocalDateTime.parse(startDate, formatter);
+        return LocalDateTime.parse(startDate, FORMATTER);
     }
+
     public LocalDateTime getEndDateInDate() {
-        return LocalDateTime.parse(endDate, formatter);
+        return LocalDateTime.parse(endDate, FORMATTER);
     }
 }
