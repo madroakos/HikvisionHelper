@@ -50,6 +50,7 @@ public class ApplicationController implements Initializable {
 
     private FixVideoManager manager;
     private final Queue<Long> mouseClickTimes = new LinkedList<>();
+    private final Queue<Integer> selectedRowOnClick = new LinkedList<>();
     private final ArrayList<CurrentFiles> currentFiles = new ArrayList<>();
     public static String ffmpegFilePath = "ffmpeg";
     public static String ffprobeFilePath = "ffprobe";
@@ -261,8 +262,9 @@ public class ApplicationController implements Initializable {
                 long currentTime = System.currentTimeMillis();
                 if (mouseClickTimes.isEmpty()) {
                     mouseClickTimes.add(currentTime);
+                    selectedRowOnClick.add(myList.getSelectionModel().getSelectedIndex());
                 } else {
-                    if (currentTime - mouseClickTimes.remove() < 500) {
+                    if (currentTime - mouseClickTimes.remove() < 500 && myList.getSelectionModel().getSelectedIndex() == selectedRowOnClick.remove()) {
                         File choosenFile = new File(String.valueOf(myList.getSelectionModel().getSelectedItem().getFileName()));
                         if (choosenFile.isFile() && choosenFile.canRead()) {
                             try {
@@ -273,6 +275,10 @@ public class ApplicationController implements Initializable {
                         }
                     } else {
                         mouseClickTimes.add(currentTime);
+                        if (!selectedRowOnClick.isEmpty()) {
+                            selectedRowOnClick.remove();
+                        }
+                        selectedRowOnClick.add(myList.getSelectionModel().getSelectedIndex());
                     }
                 }
             }
