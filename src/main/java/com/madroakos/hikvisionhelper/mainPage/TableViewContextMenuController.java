@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class TableViewContextMenuController {
-    public static ContextMenu createContextMenu(File selectedItem) {
+    public static ContextMenu createContextMenu(File selectedItem, ApplicationController controller) {
         ContextMenu contextMenu = new ContextMenu();
 
         MenuItem openItem = new MenuItem("Open");
@@ -16,7 +16,10 @@ public class TableViewContextMenuController {
         MenuItem openContainingFolderItem = new MenuItem("Open Containing Folder");
         openContainingFolderItem.setOnAction(event -> openContainingFolder(selectedItem));
 
-        contextMenu.getItems().addAll(openItem, openContainingFolderItem);
+        MenuItem deleteSelectedItem = new MenuItem("Delete");
+        deleteSelectedItem.setOnAction(event -> controller.deleteSelectedItem());
+
+        contextMenu.getItems().addAll(openItem, openContainingFolderItem, deleteSelectedItem);
 
         return contextMenu;
     }

@@ -93,7 +93,7 @@ public class ApplicationController implements Initializable {
         }
     }
 
-    private void deleteSelectedItem() {
+    public void deleteSelectedItem() {
         if (myList.getSelectionModel().getSelectedIndex() > -1) {
             currentFiles.remove(myList.getSelectionModel().getSelectedIndex());
             myList.getItems().remove(myList.getSelectionModel().getSelectedIndex());
@@ -116,7 +116,8 @@ public class ApplicationController implements Initializable {
     protected void onRightClickOnTableView() {
         if (myList.getSelectionModel().getSelectedIndex() > -1) {
             ContextMenu contextMenu = TableViewContextMenuController.createContextMenu(
-                    currentFiles.get(myList.getSelectionModel().getSelectedIndex()).getFile()
+                    currentFiles.get(myList.getSelectionModel().getSelectedIndex()).getFile(),
+                    this
             );
             contextMenu.show(myList, MouseInfo.getPointerInfo().getLocation().getX(), MouseInfo.getPointerInfo().getLocation().getY());
         }
