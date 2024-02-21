@@ -45,8 +45,8 @@
             </columnResizePolicy>
             <columns>
                <TableColumn fx:id="nameColumn" maxWidth="400.0" minWidth="100.0" prefWidth="400.0" text="Name" />
-               <TableColumn fx:id="startTime" minWidth="100.0" prefWidth="183.20001220703125" style="-fx-alignment: CENTER;" text="Start" />
-               <TableColumn fx:id="endTime" minWidth="100.0" prefWidth="183.20001220703125" style="-fx-alignment: CENTER;" text="End" />
+               <TableColumn fx:id="startTime" maxWidth="125.0" minWidth="125.0" prefWidth="125.0" style="-fx-alignment: CENTER;" text="Start" />
+               <TableColumn fx:id="endTime" maxWidth="125.0" minWidth="125.0" prefWidth="125.0" style="-fx-alignment: CENTER;" text="End" />
             </columns>
          </TableView>
             <Button fx:id="addButton" alignment="CENTER" mnemonicParsing="false" onAction="#onAddButtonClick" prefWidth="90.0" style="-fx-background-color: #FFF8EA; -fx-background-radius: 100px; -fx-border-radius: 100px; -fx-border-width: 2;" text="Select files" GridPane.columnIndex="2">
