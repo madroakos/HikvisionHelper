@@ -46,7 +46,7 @@ public class CurrentFiles {
         }
     }
 
-    private int checkFileName(String fileName) {
+    public int checkFileName(String fileName) {
         int counter = 0;
         for (String s : fileName.split("_")) {
             if (s.matches(FILENAME_PATTERN) || s.matches(FILENAME_PATTERN_WITH_EXTENSION)) {

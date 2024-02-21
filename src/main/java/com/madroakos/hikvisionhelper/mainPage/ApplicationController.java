@@ -106,7 +106,9 @@ public class ApplicationController implements Initializable {
         if (!myList.getItems().isEmpty()) {
             manager = new FixVideoManager();
             String outputPath = showFolderChooserDialog((Stage)addButton.getScene().getWindow());
-            manager.fixVideo(getFilePaths() ,outputPath);
+            if (!(outputPath == null)) {
+                manager.fixVideo(getFilePaths() ,outputPath);
+            }
         }
     }
 
@@ -140,10 +142,17 @@ public class ApplicationController implements Initializable {
         if(myList.getItems().size() > 1) {
             manager = new FixVideoManager();
             Stage stage = (Stage)myList.getScene().getWindow();
-            String outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
+            String outputPath;
+            if (currentFiles.getFirst().checkFileName(currentFiles.getFirst().getFileName()) != 0) {
+                outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
+            } else {
+                outputPath = showSingleFileChooserDialog(stage, currentFiles.getFirst().getFile().getName());
+            }
 
-            ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
-            concatVideo.start();
+            if (outputPath != null) {
+                ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
+                concatVideo.start();
+            }
         }
     }
 
@@ -220,9 +229,32 @@ public class ApplicationController implements Initializable {
                 new FileChooser.ExtensionFilter("All Files", "*.*")
         );
 
-        File selectedFile = fileChooser.showSaveDialog(stage);
+        File selectedFile;
+        if ((selectedFile = fileChooser.showSaveDialog(stage)) != null) {
+            return selectedFile.getAbsolutePath();
+        } else {
+            return null;
+        }
 
-        return selectedFile.getAbsolutePath();
+    }
+
+
+    private String showSingleFileChooserDialog(Stage stage, String filename) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enter name of file to save to...");
+        fileChooser.setInitialFileName(filename);
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Video Files", "*.mp4"),
+                new FileChooser.ExtensionFilter("All Files", "*.*")
+        );
+
+        File selectedFile;
+        if ((selectedFile = fileChooser.showSaveDialog(stage)) != null) {
+            return selectedFile.getAbsolutePath();
+        } else {
+            return null;
+        }
+
     }
 
     private String showFolderChooserDialog(Stage stage) {
@@ -234,7 +266,7 @@ public class ApplicationController implements Initializable {
         if (selectedFolder != null) {
             return selectedFolder.getAbsolutePath();
         }
-        return "";
+        return null;
     }
 
     private boolean isMp4File(File file) {
