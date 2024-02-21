@@ -1,5 +1,7 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
+import com.madroakos.hikvisionhelper.mainPage.ApplicationController;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +11,7 @@ public class CheckVideo {
     private final String command;
 
     public CheckVideo (String filePath) {
-        this.command = "\"ffmpeg.exe\" -i \"" + filePath + "\"";
+        this.command = String.format("\"%s\" -i \"%s\"", ApplicationController.ffmpegFilePath, filePath);
         System.out.println(command);
     }
 

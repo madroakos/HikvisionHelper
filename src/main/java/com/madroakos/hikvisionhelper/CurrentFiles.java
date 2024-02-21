@@ -11,7 +11,6 @@ public class CurrentFiles {
     private String startDate;
     private String endDate;
     private final String FILENAME_PATTERN = "\\d{14}";
-    private final String FILENAME_PATTERN_WITH_EXTENSION = "\\d{14}\\.mp4";
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CurrentFiles (File filename) {
@@ -49,7 +48,7 @@ public class CurrentFiles {
     public int checkFileName(String fileName) {
         int counter = 0;
         for (String s : fileName.split("_")) {
-            if (s.matches(FILENAME_PATTERN) || s.matches(FILENAME_PATTERN_WITH_EXTENSION)) {
+            if (s.matches(FILENAME_PATTERN) || s.matches(FILENAME_PATTERN + ".mp4")) {
                 counter++;
             }
         }
