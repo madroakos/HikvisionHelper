@@ -1,6 +1,6 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
-import com.madroakos.hikvisionhelper.ApplicationController;
+import com.madroakos.hikvisionhelper.mainPage.ApplicationController;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;

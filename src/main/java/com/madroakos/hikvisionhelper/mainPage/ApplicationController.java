@@ -1,5 +1,6 @@
-package com.madroakos.hikvisionhelper;
+package com.madroakos.hikvisionhelper.mainPage;
 
+import com.madroakos.hikvisionhelper.CurrentFiles;
 import com.madroakos.hikvisionhelper.ffmpeg.FixVideoManager;
 import com.madroakos.hikvisionhelper.ffmpeg.ConcatVideo;
 import javafx.application.Platform;
@@ -106,6 +107,16 @@ public class ApplicationController implements Initializable {
             manager = new FixVideoManager();
             String outputPath = showFolderChooserDialog((Stage)addButton.getScene().getWindow());
             manager.fixVideo(getFilePaths() ,outputPath);
+        }
+    }
+
+    @FXML
+    protected void onRightClickOnTableView() {
+        if (myList.getSelectionModel().getSelectedIndex() > -1) {
+            ContextMenu contextMenu = TableViewContextMenuController.createContextMenu(
+                    currentFiles.get(myList.getSelectionModel().getSelectedIndex()).getFile()
+            );
+            contextMenu.show(myList, MouseInfo.getPointerInfo().getLocation().getX(), MouseInfo.getPointerInfo().getLocation().getY());
         }
     }
 

@@ -14,13 +14,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" stylesheets="@mainpage-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.madroakos.hikvisionhelper.ApplicationController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" stylesheets="@mainpage-view.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.madroakos.hikvisionhelper.mainPage.ApplicationController">
     <VBox alignment="CENTER" blendMode="SRC_ATOP" prefHeight="600.0" prefWidth="800.0" spacing="20.0" style="-fx-background-color: #3d3b39;">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>
         <ImageView fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
-            <Image url="@../../../icons/logo.png" />
+            <Image url="@../../../../icons/logo.png" />
         </ImageView>
         <GridPane alignment="BOTTOM_CENTER" maxHeight="400.0" maxWidth="800.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="400.0">
             <columnConstraints>
@@ -39,7 +39,7 @@
                 <RowConstraints maxHeight="100.0" minHeight="40.0" prefHeight="100.0" vgrow="SOMETIMES" />
                 <RowConstraints maxHeight="20.0" minHeight="20.0" prefHeight="20.0" vgrow="SOMETIMES" />
             </rowConstraints>
-         <TableView fx:id="myList" onMouseClicked="#onMyListMouseClicked" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowSpan="8">
+         <TableView fx:id="myList" onContextMenuRequested="#onRightClickOnTableView" onMouseClicked="#onMyListMouseClicked" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowSpan="8">
             <columnResizePolicy>
                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
