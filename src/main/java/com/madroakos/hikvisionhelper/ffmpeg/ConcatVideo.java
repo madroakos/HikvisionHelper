@@ -1,5 +1,6 @@
 package com.madroakos.hikvisionhelper.ffmpeg;
 
+import com.madroakos.hikvisionhelper.SystemTrayNotification;
 import com.madroakos.hikvisionhelper.mainPage.ApplicationController;
 
 import java.io.BufferedWriter;
@@ -44,6 +45,7 @@ public class ConcatVideo extends Thread {
             throw new RuntimeException(e);
         } finally {
             tempFile.deleteOnExit();
+            new SystemTrayNotification("Done", "Merge finished!");
         }
     }
 
