@@ -53,23 +53,22 @@ public class ApplicationController implements Initializable {
     private final Queue<Long> mouseClickTimes = new LinkedList<>();
     private final Queue<Integer> selectedRowOnClick = new LinkedList<>();
     private final ArrayList<CurrentFiles> currentFiles = new ArrayList<>();
+    private static final Stage stage = new Stage();
     public static String ffmpegFilePath = "ffmpeg";
     public static String ffprobeFilePath = "ffprobe";
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getFileName()));
         startTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDate()));
         endTime.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDate()));
-
         checkPreRequisites();
     }
 
     @FXML
     protected void onAddButtonClick() {
-        Stage stage = (Stage) addButton.getScene().getWindow();
-        List<String> listOfFiles = showFileChooserDialog(stage);
+        List<String> listOfFiles = showFileChooserDialog();
 
 
         if (listOfFiles != null) {
@@ -105,7 +104,7 @@ public class ApplicationController implements Initializable {
     protected void onFixButtonClicked() {
         if (!myList.getItems().isEmpty()) {
             manager = new FixVideoManager();
-            String outputPath = showFolderChooserDialog((Stage)addButton.getScene().getWindow());
+            String outputPath = showFolderChooserDialog();
             if (!(outputPath == null)) {
                 manager.fixVideo(getFilePaths() ,outputPath);
             }
@@ -142,12 +141,11 @@ public class ApplicationController implements Initializable {
     protected void onMergeButtonClicked() {
         if(myList.getItems().size() > 1) {
             manager = new FixVideoManager();
-            Stage stage = (Stage)myList.getScene().getWindow();
             String outputPath;
             if (currentFiles.getFirst().checkFileName(currentFiles.getFirst().getFileName()) != 0) {
-                outputPath = showSingleFileChooserDialog(stage, getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
+                outputPath = showSingleFileChooserDialog(getFileNameWithoutTimestamp(currentFiles.getFirst().getFile().getName()), getFilesMinDate(), getFilesMaxDate());
             } else {
-                outputPath = showSingleFileChooserDialog(stage, currentFiles.getFirst().getFile().getName());
+                outputPath = showSingleFileChooserDialog(currentFiles.getFirst().getFile().getName());
             }
 
             if (outputPath != null) {
@@ -195,7 +193,7 @@ public class ApplicationController implements Initializable {
         manager = new FixVideoManager();
     }
 
-    private List<String> showFileChooserDialog(Stage stage) {
+    private List<String> showFileChooserDialog() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select Files");
         fileChooser.getExtensionFilters().addAll(
@@ -221,7 +219,7 @@ public class ApplicationController implements Initializable {
         }
     }
 
-    private String showSingleFileChooserDialog(Stage stage, String filename, String startDate, String endDate) {
+    private String showSingleFileChooserDialog(String filename, String startDate, String endDate) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Enter name of file to save to...");
         fileChooser.setInitialFileName(String.format("%s_%s_%s", filename, startDate, endDate));
@@ -240,7 +238,7 @@ public class ApplicationController implements Initializable {
     }
 
 
-    private String showSingleFileChooserDialog(Stage stage, String filename) {
+    private String showSingleFileChooserDialog(String filename) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Enter name of file to save to...");
         fileChooser.setInitialFileName(filename);
@@ -258,7 +256,7 @@ public class ApplicationController implements Initializable {
 
     }
 
-    private String showFolderChooserDialog(Stage stage) {
+    private String showFolderChooserDialog() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Select Folder to save to...");
 
@@ -312,22 +310,22 @@ public class ApplicationController implements Initializable {
         }
     }
 
-    private static void checkPreRequisites() {
+    private void checkPreRequisites() {
         if (!isFfmpegExecutableInPath()) {
             JOptionPane.showMessageDialog(null, "Okay!", "Please locate ffmpeg and ffprobe", JOptionPane.INFORMATION_MESSAGE);
-            if (((ffmpegFilePath = showSingleFileChooserDialog("ffmpeg")).isEmpty()) ||
-                    ((ffprobeFilePath = showSingleFileChooserDialog("ffprobe")).isEmpty())) {
+            if (((ffmpegFilePath = locateMissingFiles("ffmpeg")).isEmpty()) ||
+                    ((ffprobeFilePath = locateMissingFiles("ffprobe")).isEmpty())) {
                 Platform.exit();
             }
         }
     }
 
-    private static String showSingleFileChooserDialog(String fileToBeFound) {
+    private String locateMissingFiles(String fileToBeFound) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle(String.format("Please locate %s", fileToBeFound));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileToBeFound, fileToBeFound + ".exe"));
 
-        File selectedFile = fileChooser.showOpenDialog(new Stage());
+        File selectedFile = fileChooser.showOpenDialog(stage);
 
         if (selectedFile != null) {
             return selectedFile.getAbsolutePath();
