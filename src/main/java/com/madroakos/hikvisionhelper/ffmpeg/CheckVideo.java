@@ -11,7 +11,7 @@ public class CheckVideo {
     private final String command;
 
     public CheckVideo (String filePath) {
-        this.command = String.format("\"%s\" -i \"%s\"", ApplicationController.ffmpegFilePath, filePath);
+        this.command = String.format("\"%s\" -i \"%s\"", ApplicationController.ffprobeFilePath, filePath);
         System.out.println(command);
     }
 
