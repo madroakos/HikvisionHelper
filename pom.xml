@@ -5,16 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.madroakos</groupId>
     <artifactId>HikvisionHelper</artifactId>
-    <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.1</version>
     <name>HikvisionHelper</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>21</javafx.version>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
     </properties>
     <dependencies>
         <dependency>
@@ -44,6 +41,7 @@
                     <mainClass>com.madroakos.hikvisionhelper.Main</mainClass>
                     <launcher>HikvisionHelper</launcher>
                     <jlinkImageName>HikvisionHelper</jlinkImageName>
+                    <jlinkZipName>HikvisionHelper</jlinkZipName>
                 </configuration>
             </plugin>
             <plugin>
@@ -54,6 +52,31 @@
                     <source>21</source>
                     <target>21</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>project-classifier</shadedClassifierName>
+                            <outputFile>shade\${project.artifactId}.jar</outputFile>
+                            <transformers>
+                                <transformer implementation=
+                                                     "org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.madroakos.hikvisionhelper.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
