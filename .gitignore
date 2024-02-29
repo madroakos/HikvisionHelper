@@ -8,3 +8,7 @@ ffprobe.exe
 *.fxml
 temp.txt
 /out/
+/shade/HikvisionHelper.jar
+/myExe/HikvisionHelper-1.0.msi
+/src/main/resources/icons/logo.ico
+/package.bat
