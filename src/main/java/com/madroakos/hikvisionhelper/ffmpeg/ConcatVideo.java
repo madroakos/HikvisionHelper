@@ -2,6 +2,8 @@ package com.madroakos.hikvisionhelper.ffmpeg;
 
 import com.madroakos.hikvisionhelper.SystemTrayNotification;
 import com.madroakos.hikvisionhelper.mainPage.ApplicationController;
+import javafx.application.Platform;
+import javafx.scene.control.ProgressBar;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,10 +13,12 @@ import java.io.IOException;
 public class ConcatVideo extends Thread {
     private final File[] filePath;
     private final String outputPath;
+    private final ProgressBar progressBar;
 
-    public ConcatVideo(File[] filePath, String outputPath) {
+    public ConcatVideo(File[] filePath, String outputPath, ProgressBar progressBar) {
         this.filePath = filePath;
         this.outputPath = outputPath;
+        this.progressBar = progressBar;
     }
 
     public void run() {
@@ -38,6 +42,7 @@ public class ConcatVideo extends Thread {
 
         ProcessBuilder processBuilder = getCommand(tempFile.getAbsolutePath(), hasAudio);
         System.out.println(processBuilder.command());
+        updateProgressBar(0.5);
         try {
             Process process = processBuilder.inheritIO().start();
             process.waitFor();
@@ -46,6 +51,7 @@ public class ConcatVideo extends Thread {
         } finally {
             tempFile.deleteOnExit();
             new SystemTrayNotification("Done", "Merge finished!");
+            updateProgressBar(1);
         }
     }
 
@@ -60,5 +66,9 @@ public class ConcatVideo extends Thread {
             processBuilder = new ProcessBuilder(commandForNoAudio);
         }
         return processBuilder;
+    }
+
+    private void updateProgressBar(double progress) {
+        Platform.runLater(() -> progressBar.setProgress(progress));
     }
 }

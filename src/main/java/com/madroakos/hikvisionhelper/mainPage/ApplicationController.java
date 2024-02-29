@@ -48,6 +48,8 @@ public class ApplicationController implements Initializable {
     private Button mergeButton;
     @FXML
     private Label itemLabel;
+    @FXML
+    private ProgressBar progressBar;
 
     private FixVideoManager manager;
     private final Queue<Long> mouseClickTimes = new LinkedList<>();
@@ -106,7 +108,7 @@ public class ApplicationController implements Initializable {
             manager = new FixVideoManager();
             String outputPath = showFolderChooserDialog();
             if (!(outputPath == null)) {
-                manager.fixVideo(getFilePaths() ,outputPath);
+                manager.fixVideo(getFilePaths() ,outputPath, progressBar);
             }
         }
     }
@@ -135,6 +137,7 @@ public class ApplicationController implements Initializable {
         currentFiles.clear();
         myList.getItems().clear();
         itemLabel.setText("0 items");
+        progressBar.setProgress(-1);
     }
 
     @FXML
@@ -149,7 +152,7 @@ public class ApplicationController implements Initializable {
             }
 
             if (outputPath != null) {
-                ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath);
+                ConcatVideo concatVideo = new ConcatVideo(getFilePaths(), outputPath, progressBar);
                 concatVideo.start();
             }
         }
