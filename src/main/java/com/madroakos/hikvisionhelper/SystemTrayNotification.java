@@ -14,6 +14,8 @@ public class SystemTrayNotification {
                 trayIcon.displayMessage(title,  message, TrayIcon.MessageType.INFO);
             } catch (AWTException e) {
                 System.err.println("TrayIcon could not be added.");
+            } finally {
+                tray.remove(trayIcon);
             }
         } else {
             System.err.println("SystemTray is not supported.");
