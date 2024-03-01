@@ -50,7 +50,7 @@ public class ConcatVideo extends Thread {
             throw new RuntimeException(e);
         } finally {
             tempFile.deleteOnExit();
-            new SystemTrayNotification("Done", "Merge finished!");
+            SystemTrayNotification.getInstance().showMessage("Done", "Merge finished");
             updateProgressBar(1);
         }
     }

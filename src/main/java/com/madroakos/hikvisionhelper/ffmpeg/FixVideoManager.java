@@ -29,7 +29,7 @@ public class FixVideoManager {
                 throw new RuntimeException(e);
             } finally {
                 executor.shutdown();
-                new SystemTrayNotification("Done", "Fix is completed");
+                SystemTrayNotification.getInstance().showMessage("Done", "Fix is completed");
             }
         }).start();
     }

@@ -22,5 +22,8 @@ public class ApplicationLoader extends javafx.application.Application {
         stage.setScene(scene);
         stage.getIcons().add(new Image(Objects.requireNonNull(ApplicationLoader.class.getResourceAsStream("/icons/logo.png"))));
         stage.show();
+        SystemTrayNotification.getInstance();
+
+        stage.setOnCloseRequest(event -> SystemTrayNotification.getInstance().shutDown());
     }
 }
