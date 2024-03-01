@@ -6,13 +6,19 @@ public class SystemTrayNotification {
     private static SystemTrayNotification instance = new SystemTrayNotification();
     private SystemTray tray;
     private TrayIcon trayIcon;
+    private PopupMenu popupMenu;
     public SystemTrayNotification() {
         if (SystemTray.isSupported()) {
+            popupMenu = new PopupMenu();
+            MenuItem exitItem = new MenuItem("Exit");
+            popupMenu.add(exitItem);
+
+
             tray = SystemTray.getSystemTray();
             Image image = Toolkit.getDefaultToolkit().getImage("src/main/resources/icons/logo.png");
             Dimension trayIconSize = tray.getTrayIconSize();
             image = image.getScaledInstance(trayIconSize.width, trayIconSize.height, Image.SCALE_SMOOTH);
-            trayIcon = new TrayIcon(image, "HikvisionHelper");
+            trayIcon = new TrayIcon(image, "HikvisionHelper", popupMenu);
             try {
                 tray.add(trayIcon);
             } catch (AWTException e) {
@@ -36,5 +42,8 @@ public class SystemTrayNotification {
 
     public void showMessage(String caption, String text) {
         trayIcon.displayMessage(caption, text, TrayIcon.MessageType.INFO);
+    }
+    public PopupMenu getPopupMenu() {
+        return popupMenu;
     }
 }
