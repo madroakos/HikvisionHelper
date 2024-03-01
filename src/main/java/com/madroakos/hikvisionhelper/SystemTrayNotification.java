@@ -1,6 +1,10 @@
 package com.madroakos.hikvisionhelper;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class SystemTrayNotification {
     private static SystemTrayNotification instance = new SystemTrayNotification();
@@ -15,7 +19,13 @@ public class SystemTrayNotification {
 
 
             tray = SystemTray.getSystemTray();
-            Image image = Toolkit.getDefaultToolkit().getImage("src/main/resources/icons/logo.png");
+            InputStream inputStream = getClass().getResourceAsStream("/icons/logo.png");
+            Image image;
+            try {
+                image = ImageIO.read(Objects.requireNonNull(inputStream));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             Dimension trayIconSize = tray.getTrayIconSize();
             image = image.getScaledInstance(trayIconSize.width, trayIconSize.height, Image.SCALE_SMOOTH);
             trayIcon = new TrayIcon(image, "HikvisionHelper", popupMenu);
