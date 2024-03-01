@@ -12,6 +12,7 @@ public class CurrentFiles {
     private String startDate;
     private String endDate;
     private static final String FILENAME_PATTERN = "\\d{14}";
+    private static final String FILENAME_PATTERN_WITH_EXTENSION = "\\d{14}.mp4";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public CurrentFiles(File file) {
@@ -32,7 +33,7 @@ public class CurrentFiles {
         String timeStamp;
         int counter = 1;
         for (String part : file.getName().split("_")) {
-            if (part.matches(FILENAME_PATTERN)) {
+            if (part.matches(FILENAME_PATTERN) || part.matches(FILENAME_PATTERN_WITH_EXTENSION)) {
                 timeStamp = part;
                 if (counter == 1) {
                     startDate = formatTimestamp(timeStamp);
@@ -48,7 +49,7 @@ public class CurrentFiles {
     public int checkFileName(String fileName) {
         int counter = 0;
         for (String part : fileName.split("_")) {
-            if (part.matches(FILENAME_PATTERN) || part.matches(FILENAME_PATTERN + ".mp4")) {
+            if (part.matches(FILENAME_PATTERN) || part.matches(FILENAME_PATTERN_WITH_EXTENSION)) {
                 counter++;
             }
         }
@@ -67,6 +68,7 @@ public class CurrentFiles {
 
     private void setTimesWithoutEndTime() {
         String timeStamp = getTimestampFromFileName();
+        System.out.println(timeStamp);
         startDate = formatTimestamp(timeStamp);
         String commandForNoEndDate = String.format("\"%s\" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"%s\"", ApplicationController.ffprobeFilePath, file.getAbsolutePath());
         System.out.println(commandForNoEndDate);
@@ -83,7 +85,13 @@ public class CurrentFiles {
         if (parts.length < 2) {
             throw new IllegalArgumentException("Invalid file name format: " + file.getName());
         }
-        return parts[1];
+
+        for (String part : parts) {
+            if (part.matches(FILENAME_PATTERN) || part.matches(FILENAME_PATTERN_WITH_EXTENSION)) {
+                return part;
+            }
+        }
+        throw new IllegalArgumentException("Invalid file name format: " + file.getName());
     }
 
     private String formatTimestamp(String timeStamp) {

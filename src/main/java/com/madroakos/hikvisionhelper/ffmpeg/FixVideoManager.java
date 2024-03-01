@@ -3,7 +3,6 @@ package com.madroakos.hikvisionhelper.ffmpeg;
 
 import com.madroakos.hikvisionhelper.SystemTrayNotification;
 import javafx.scene.control.ProgressBar;
-
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
